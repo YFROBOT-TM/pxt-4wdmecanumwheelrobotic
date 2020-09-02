@@ -5,12 +5,14 @@
     "license": "MIT",
     "dependencies": {
         "core": "*",
-        "radio": "*"
+        "radio": "*",
+        "neopixel": "github:microsoft/pxt-neopixel"
     },
     "files": [
         "README.md",
         "main.blocks",
-        "main.ts"
+        "main.ts",
+        "robotic.ts"
     ],
     "testFiles": [
         "test.ts"
