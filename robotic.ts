@@ -162,61 +162,48 @@ namespace Robotic {
         }
     }
 
+    // Set the speed of Robot motor.
+    // If the speed is greater than 0, the motor will rotate forward, and if the speed is less than 0, the motor will reverse.
+    function setSingleMotor(dirPin: number, pwmPin: number, speed: number) {
+        speed = speed * 16; // map 255 to 4096
+
+        if (speed >= 4096) speed = 4095
+        if (speed <= -4096) speed = -4095
+
+        if (speed >= 0) {
+            setPwm(dirPin, 0, 4096)
+            setPwm(pwmPin, 0, speed)
+        } else {
+            setPwm(dirPin, 4096, 0)
+            setPwm(pwmPin, 0, -speed)
+        }
+    }
+
     /**
-     * Set the direction and speed of Robot motor.
+     * Set the speed of Robot motor. 
      * @param speedMotor1 speed of motor 1 (-255 to 255). eg: 120
      * @param speedMotor2 speed of motor 2 (-255 to 255). eg: 120
      * @param speedMotor3 speed of motor 3 (-255 to 255). eg: 120
      * @param speedMotor4 speed of motor 4 (-255 to 255). eg: 120
      */
-    //% blockId=robotic_set_motor block="Motor|%index|speed %speed"
-    //% weight=85
-    //% speed.min=0 speed.max=255
+    //% blockId=robotic_set_motor block="Motor1|%speedMotor1|Motor2|%speedMotor2|Motor3|%speedMotor3|Motor4 %speedMotor4"
+    //% weight=83
+    //% speedMotor1.min=-255 speedMotor1.max=255
+    //% speedMotor2.min=-255 speedMotor2.max=255
+    //% speedMotor3.min=-255 speedMotor3.max=255
+    //% speedMotor4.min=-255 speedMotor4.max=255
     //% name.fieldEditor="gridpicker" name.fieldOptions.columns=2
-    export function setFourMotor(index: Motors, direction: Dir, speed: number): void {
+    export function setFourMotor(speedMotor1: number, speedMotor2: number, speedMotor3: number, speedMotor4: number): void {
         if (!initialized) {
             initPCA9685()
         }
-        speed = speed * 16; // map 255 to 4096
-        if (speed >= 4096) {
-            speed = 4095
-        }
-        if (speed <= 0) {
-            speed = 0
-        }
-        if (index > 4 || index <= 0)
-            return
-        if (index != Motors.MAll) {
-            let mDirPin = (index - 1) * 2
-            let mPwmPin = (index - 1) * 2 + 1
-            if (direction == 0) {
-                setPwm(mDirPin, 0, 4096)
-                setPwm(mPwmPin, 0, speed)
-            } else {
-                setPwm(mDirPin, 4096, 0)
-                setPwm(mPwmPin, 0, speed)
-            }
-        } else {
-            if (direction == 0) {
-                setPwm(0, 0, 4096)
-                setPwm(2, 0, 4096)
-                setPwm(4, 0, 4096)
-                setPwm(6, 0, 4096)
-                setPwm(1, 0, speed)
-                setPwm(3, 0, speed)
-                setPwm(5, 0, speed)
-                setPwm(7, 0, speed)
-            } else {
-                setPwm(0, 4096, 0)
-                setPwm(2, 4096, 0)
-                setPwm(4, 4096, 0)
-                setPwm(6, 4096, 0)
-                setPwm(1, 0, speed)
-                setPwm(3, 0, speed)
-                setPwm(5, 0, speed)
-                setPwm(7, 0, speed)
-            }
-        }
+
+        setSingleMotor(0, 1, speedMotor1);
+        setSingleMotor(2, 3, speedMotor2);
+        setSingleMotor(4, 5, speedMotor3);
+        setSingleMotor(6, 7, speedMotor4);
     }
+
+
 
 }
