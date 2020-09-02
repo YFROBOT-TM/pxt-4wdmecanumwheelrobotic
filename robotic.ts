@@ -11,7 +11,7 @@
 */
 
 
-//% color="#7BD239" weight=10 icon="\uf1b0" block="RoboticFourWheelDriver"
+//% color="#7BD239" weight=10 icon="\uf1b0" block="Robotic4WD"
 namespace Robotic {
     const PCA9685_ADDRESS = 0x40
     const MODE1 = 0x00
@@ -30,10 +30,10 @@ namespace Robotic {
     const ALL_LED_OFF_H = 0xFD
 
     export enum Motors {
-        M1A = 0x1,
-        M1B = 0x2,
-        M2A = 0x3,
-        M2B = 0x4,
+        M1 = 0x1,
+        M2 = 0x2,
+        M3 = 0x3,
+        M4 = 0x4,
         MAll = 0x5
     }
 
@@ -106,16 +106,19 @@ namespace Robotic {
         pins.i2cWriteBuffer(PCA9685_ADDRESS, buf);
     }
 
+    
+
     /**
      * Set the direction and speed of Robot motor.
      * @param index motors index: M1/M2/M3/M4/MAll
      * @param direction direction to turn
      * @param speed speed of motors (0 to 255). eg: 120
      */
-    //% blockId=robotic_set_motor block="Motor|%index|speed %speed"
+    //% blockId=robotic_set_motor block="Motor|%index|%direction|speed %speed"
     //% weight=85
     //% speed.min=0 speed.max=255
-    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=2
+    //% index.fieldEditor="gridpicker" index.fieldOptions.columns=2
+    //% direction.fieldEditor="gridpicker" direction.fieldOptions.columns=2
     export function setMotor(index: Motors, direction: Dir, speed: number): void {
         if (!initialized) {
             initPCA9685()
@@ -142,21 +145,21 @@ namespace Robotic {
         } else {
             if (direction == 0) {
                 setPwm(0, 0, 4096)
-                setPwm(2, 0, 4096)
-                setPwm(4, 0, 4096)
-                setPwm(6, 0, 4096)
                 setPwm(1, 0, speed)
+                setPwm(2, 0, 4096)
                 setPwm(3, 0, speed)
+                setPwm(4, 0, 4096)
                 setPwm(5, 0, speed)
+                setPwm(6, 0, 4096)
                 setPwm(7, 0, speed)
             } else {
                 setPwm(0, 4096, 0)
-                setPwm(2, 4096, 0)
-                setPwm(4, 4096, 0)
-                setPwm(6, 4096, 0)
                 setPwm(1, 0, speed)
+                setPwm(2, 4096, 0)
                 setPwm(3, 0, speed)
+                setPwm(4, 4096, 0)
                 setPwm(5, 0, speed)
+                setPwm(6, 4096, 0)
                 setPwm(7, 0, speed)
             }
         }
@@ -180,19 +183,19 @@ namespace Robotic {
     }
 
     /**
-     * Set the speed of Robot motor. 
+     * Set the speed of four Robot motors at the same time. 
      * @param speedMotor1 speed of motor 1 (-255 to 255). eg: 120
      * @param speedMotor2 speed of motor 2 (-255 to 255). eg: 120
      * @param speedMotor3 speed of motor 3 (-255 to 255). eg: 120
      * @param speedMotor4 speed of motor 4 (-255 to 255). eg: 120
      */
-    //% blockId=robotic_set_motor block="Motor1|%speedMotor1|Motor2|%speedMotor2|Motor3|%speedMotor3|Motor4 %speedMotor4"
+    //% blockId=robotic_set_four_motor block="Motor|%speedMotor1|M2|%speedMotor2|M3|%speedMotor3|M4 %speedMotor4"
     //% weight=83
     //% speedMotor1.min=-255 speedMotor1.max=255
     //% speedMotor2.min=-255 speedMotor2.max=255
     //% speedMotor3.min=-255 speedMotor3.max=255
     //% speedMotor4.min=-255 speedMotor4.max=255
-    //% name.fieldEditor="gridpicker" name.fieldOptions.columns=2
+    //% inlineInputMode=inline
     export function setFourMotor(speedMotor1: number, speedMotor2: number, speedMotor3: number, speedMotor4: number): void {
         if (!initialized) {
             initPCA9685()
