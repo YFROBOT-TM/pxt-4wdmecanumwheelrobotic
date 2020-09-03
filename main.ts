@@ -1,7 +1,15 @@
-Robotic.setFourMotor(120, 120, 120, 120)
-basic.pause(1000)
-Robotic.setMotor(Robotic.Motors.MAll, Robotic.Dir.CW, 120)
-basic.pause(1000)
-basic.forever(function () {
-	
+input.onButtonPressed(Button.A, function () {
+    Robotic.setMotor(Robotic.Motors.M4, Robotic.Dir.CW, 35)
+    basic.pause(1000)
+    Robotic.setMotor(Robotic.Motors.M4, Robotic.Dir.CCW, 41)
+    basic.pause(1000)
+    Robotic.stopMotor(Robotic.Motors.MAll)
 })
+input.onButtonPressed(Button.B, function () {
+    Robotic.setFourMotor(40, 40, 40, 40)
+    basic.pause(1000)
+    Robotic.setFourMotor(-40, -40, -40, -40)
+    basic.pause(1000)
+    Robotic.setFourMotor(0, 0, 0, 0)
+})
+Robotic.initMotorDirectionReverse(Robotic.SetMotorDir.CW, Robotic.SetMotorDir.CW, Robotic.SetMotorDir.CW, Robotic.SetMotorDir.CW)

@@ -29,6 +29,15 @@ namespace Robotic {
     const ALL_LED_OFF_L = 0xFC
     const ALL_LED_OFF_H = 0xFD
 
+    const Motor1DirectionChannel = 0;
+    const Motor1PWMChannel = 1;
+    const Motor2DirectionChannel = 2;
+    const Motor2PWMChannel = 3;
+    const Motor3DirectionChannel = 4;
+    const Motor3PWMChannel = 5;
+    const Motor4DirectionChannel = 6;
+    const Motor4PWMChannel = 7;
+
     export enum Motors {
         M1 = 0x1,
         M2 = 0x2,
@@ -39,12 +48,25 @@ namespace Robotic {
 
     export enum Dir {
         //% blockId="CW" block="Forward"
-        CW = 0x0,
+        CW = 1,
         //% blockId="CCW" block="Backward"
-        CCW = 0x1
+        CCW = -1
     }
 
+    export enum SetMotorDir {
+        //% block="Positive"
+        CW = 1,
+        //% block="Reverse"
+        CCW = -1
+    }
+
+
     let initialized = false  // Initialization flag
+    let Motor1Dir = 1;      // motor 1 direction
+    let Motor2Dir = 1;      // motor 2 direction
+    let Motor3Dir = 1;      // motor 3 direction
+    let Motor4Dir = 1;      // motor 4 direction
+
 
     function i2cwrite(addr: number, reg: number, value: number) {
         let buf = pins.createBuffer(2)
@@ -106,8 +128,6 @@ namespace Robotic {
         pins.i2cWriteBuffer(PCA9685_ADDRESS, buf);
     }
 
-    
-
     /**
      * Set the direction and speed of Robot motor.
      * @param index motors index: M1/M2/M3/M4/MAll
@@ -130,38 +150,50 @@ namespace Robotic {
         if (speed <= 0) {
             speed = 0
         }
-        if (index > 4 || index <= 0)
+        if (index > 5 || index <= 0)
             return
-        if (index != Motors.MAll) {
+
+        if (index == Motors.MAll) {
+            if (direction * Motor1Dir == 1)
+                setPwm(Motor1DirectionChannel, 0, 4096)
+            else
+                setPwm(Motor1DirectionChannel, 4096, 0)
+            if (direction * Motor2Dir == 1)
+                setPwm(Motor2DirectionChannel, 4096, 0)
+            else
+                setPwm(Motor2DirectionChannel, 0, 4096)
+            if (direction * Motor3Dir == 1)
+                setPwm(Motor3DirectionChannel, 0, 4096)
+            else
+                setPwm(Motor3DirectionChannel, 4096, 0)
+            if (direction * Motor4Dir == 1)
+                setPwm(Motor4DirectionChannel, 4096, 0)
+            else
+                setPwm(Motor4DirectionChannel, 0, 4096)
+
+            setPwm(Motor1PWMChannel, 0, speed)
+            setPwm(Motor2PWMChannel, 0, speed)
+            setPwm(Motor3PWMChannel, 0, speed)
+            setPwm(Motor4PWMChannel, 0, speed)
+        } else {
+            let dir
             let mDirPin = (index - 1) * 2
             let mPwmPin = (index - 1) * 2 + 1
-            if (direction == 0) {
+            if (mDirPin == 0) {
+                dir = Motor1Dir
+            } else if (mDirPin == 2) {
+                dir = Motor2Dir*-1
+            } else if (mDirPin == 4) {
+                dir = Motor3Dir
+            } else if (mDirPin == 6) {
+                dir = Motor4Dir*-1
+            }
+            if (direction * dir == 1) {
                 setPwm(mDirPin, 0, 4096)
-                setPwm(mPwmPin, 0, speed)
             } else {
                 setPwm(mDirPin, 4096, 0)
-                setPwm(mPwmPin, 0, speed)
             }
-        } else {
-            if (direction == 0) {
-                setPwm(0, 0, 4096)
-                setPwm(1, 0, speed)
-                setPwm(2, 0, 4096)
-                setPwm(3, 0, speed)
-                setPwm(4, 0, 4096)
-                setPwm(5, 0, speed)
-                setPwm(6, 0, 4096)
-                setPwm(7, 0, speed)
-            } else {
-                setPwm(0, 4096, 0)
-                setPwm(1, 0, speed)
-                setPwm(2, 4096, 0)
-                setPwm(3, 0, speed)
-                setPwm(4, 4096, 0)
-                setPwm(5, 0, speed)
-                setPwm(6, 4096, 0)
-                setPwm(7, 0, speed)
-            }
+            setPwm(mPwmPin, 0, speed)
         }
     }
 
@@ -189,7 +221,7 @@ namespace Robotic {
      * @param speedMotor3 speed of motor 3 (-255 to 255). eg: 120
      * @param speedMotor4 speed of motor 4 (-255 to 255). eg: 120
      */
-    //% blockId=robotic_set_four_motor block="Motor|%speedMotor1|M2|%speedMotor2|M3|%speedMotor3|M4 %speedMotor4"
+    //% blockId=robotic_set_four_motor block="Motor M1|%speedMotor1|M2|%speedMotor2|M3|%speedMotor3|M4 %speedMotor4"
     //% weight=83
     //% speedMotor1.min=-255 speedMotor1.max=255
     //% speedMotor2.min=-255 speedMotor2.max=255
@@ -200,11 +232,58 @@ namespace Robotic {
         if (!initialized) {
             initPCA9685()
         }
+        // motor direction
+        speedMotor1 = speedMotor1 * Motor1Dir
+        speedMotor2 = speedMotor2 * Motor2Dir
+        speedMotor3 = speedMotor3 * Motor3Dir
+        speedMotor4 = speedMotor4 * Motor4Dir
 
-        setSingleMotor(0, 1, speedMotor1);
-        setSingleMotor(2, 3, speedMotor2);
-        setSingleMotor(4, 5, speedMotor3);
-        setSingleMotor(6, 7, speedMotor4);
+        setSingleMotor(Motor1DirectionChannel, Motor1PWMChannel, speedMotor1);
+        setSingleMotor(Motor2DirectionChannel, Motor2PWMChannel, -speedMotor2);
+        setSingleMotor(Motor3DirectionChannel, Motor3PWMChannel, speedMotor3);
+        setSingleMotor(Motor4DirectionChannel, Motor4PWMChannel, -speedMotor4);
+    }
+
+    /**
+     * Set the direction of four Robot motors at the same time. 
+     * @param m1Dir direction of motor1.
+     * @param m2Dir direction of motor2.
+     * @param m3Dir direction of motor3.
+     * @param m4Dir direction of motor4.
+     */
+    //% blockId=robotic_init_four_motor_direction block="Motor M1|%speedMotor1|M2|%speedMotor2|M3|%speedMotor3|M4 %speedMotor4"
+    //% weight=100
+    //% inlineInputMode=inline
+    //% advanced=true
+    export function initMotorDirectionReverse(m1Dir: SetMotorDir, m2Dir: SetMotorDir, m3Dir: SetMotorDir, m4Dir: SetMotorDir) {
+        Motor1Dir = m1Dir;      // motor 1 direction
+        Motor2Dir = m2Dir;      // motor 2 direction
+        Motor3Dir = m3Dir;      // motor 3 direction
+        Motor4Dir = m4Dir;      // motor 4 direction
+    }
+
+    /**
+     * Stop Robot motors. 
+     * @param index motors index: M1/M2/M3/M4/MAll
+     */
+    //% blockId=robotic_stop_motor block="Stop Motor |%index"
+    //% weight=81
+    //% inlineInputMode=inline
+    export function stopMotor(index: Motors): void {
+        if (!initialized) {
+            initPCA9685()
+        }
+        if (index > 5 || index <= 0)
+            return
+        if (index == Motors.MAll) {
+            setPwm(Motor1PWMChannel, 0, 0)
+            setPwm(Motor2PWMChannel, 0, 0)
+            setPwm(Motor3PWMChannel, 0, 0)
+            setPwm(Motor4PWMChannel, 0, 0)
+        } else {
+            let mPwmPin = (index - 1) * 2 + 1
+            setPwm(mPwmPin, 0, 0)
+        }
     }
 
 
