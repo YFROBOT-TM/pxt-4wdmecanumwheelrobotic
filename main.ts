@@ -1,5 +1,5 @@
 input.onButtonPressed(Button.A, function () {
-    basic.showNumber(Robotic.Ultrasonic(Robotic.UUltrasonicAddress.Addr13))
+    basic.showNumber(Robotic.Ultrasonic(Robotic.UltrasonicAddress.Addr13))
 })
 input.onButtonPressed(Button.B, function () {
     Robotic.setFourMotor(40, 40, 40, 40)
