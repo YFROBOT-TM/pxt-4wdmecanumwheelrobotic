@@ -1,9 +1,5 @@
 input.onButtonPressed(Button.A, function () {
-    Robotic.setMotor(Robotic.Motors.M4, Robotic.Dir.CW, 35)
-    basic.pause(1000)
-    Robotic.setMotor(Robotic.Motors.M4, Robotic.Dir.CCW, 41)
-    basic.pause(1000)
-    Robotic.stopMotor(Robotic.Motors.MAll)
+    basic.showNumber(Robotic.Ultrasonic(Robotic.UUltrasonicAddress.Addr13))
 })
 input.onButtonPressed(Button.B, function () {
     Robotic.setFourMotor(40, 40, 40, 40)
@@ -13,3 +9,4 @@ input.onButtonPressed(Button.B, function () {
     Robotic.setFourMotor(0, 0, 0, 0)
 })
 Robotic.initMotorDirectionReverse(Robotic.SetMotorDir.CW, Robotic.SetMotorDir.CW, Robotic.SetMotorDir.CW, Robotic.SetMotorDir.CW)
+music.playMelody("C5 B A G F E D C ", 500)

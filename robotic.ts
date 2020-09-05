@@ -29,14 +29,21 @@ namespace Robotic {
     const ALL_LED_OFF_L = 0xFC
     const ALL_LED_OFF_H = 0xFD
 
-    const Motor1DirectionChannel = 0;
-    const Motor1PWMChannel = 1;
-    const Motor2DirectionChannel = 2;
-    const Motor2PWMChannel = 3;
-    const Motor3DirectionChannel = 4;
-    const Motor3PWMChannel = 5;
-    const Motor4DirectionChannel = 6;
-    const Motor4PWMChannel = 7;
+    // motor pca9685 channel 
+    const Motor1DirectionChannel = 0
+    const Motor1PWMChannel = 1
+    const Motor2DirectionChannel = 2
+    const Motor2PWMChannel = 3
+    const Motor3DirectionChannel = 4
+    const Motor3PWMChannel = 5
+    const Motor4DirectionChannel = 6
+    const Motor4PWMChannel = 7
+
+    // iic Ultrasonic SR09 
+    // http://www.yfrobot.com/wiki/index.php?title=Ultrasonic
+    const CMDREG = 0x02
+    const CMDB4 = 0xB4  // 1~500cm , mm, Temperature compensation, max interval 87ms
+
 
     export enum Motors {
         M1 = 0x1,
@@ -60,12 +67,26 @@ namespace Robotic {
         CCW = -1
     }
 
+    export enum UltrasonicAddress {
+        Addr1 = 0xD0, Addr2 = 0xD2,
+        Addr3 = 0xD4, Addr4 = 0xD6,
+        Addr5 = 0xD8, Addr6 = 0xDA,
+        Addr7 = 0xDC, Addr8 = 0xDE,
+        Addr9 = 0xE0, Addr10 = 0xE2,
+        Addr11 = 0xE4, Addr12 = 0xE6,
+        Addr13 = 0xE8, Addr14 = 0xEA,
+        Addr15 = 0xEC, Addr16 = 0xEE,
+        Addr17 = 0xF8, Addr18 = 0xFA,
+        Addr19 = 0xFC, Addr20 = 0xFE
+    }
 
-    let initialized = false  // Initialization flag
-    let Motor1Dir = 1;      // motor 1 direction
-    let Motor2Dir = 1;      // motor 2 direction
-    let Motor3Dir = 1;      // motor 3 direction
-    let Motor4Dir = 1;      // motor 4 direction
+
+    let initialized = false // Initialization flag
+    let Motor1Dir = 1       // motor 1 direction
+    let Motor2Dir = 1       // motor 2 direction
+    let Motor3Dir = 1       // motor 3 direction
+    let Motor4Dir = 1       // motor 4 direction
+    let SR09Address = 0xE8  // sr09 iic address
 
 
     function i2cwrite(addr: number, reg: number, value: number) {
@@ -182,11 +203,11 @@ namespace Robotic {
             if (mDirPin == 0) {
                 dir = Motor1Dir
             } else if (mDirPin == 2) {
-                dir = Motor2Dir*-1
+                dir = Motor2Dir * -1
             } else if (mDirPin == 4) {
                 dir = Motor3Dir
             } else if (mDirPin == 6) {
-                dir = Motor4Dir*-1
+                dir = Motor4Dir * -1
             }
             if (direction * dir == 1) {
                 setPwm(mDirPin, 0, 4096)
@@ -268,6 +289,7 @@ namespace Robotic {
      */
     //% blockId=robotic_stop_motor block="Stop Motor |%index"
     //% weight=81
+    //% index.fieldEditor="gridpicker" index.fieldOptions.columns=2
     //% inlineInputMode=inline
     export function stopMotor(index: Motors): void {
         if (!initialized) {
@@ -286,6 +308,22 @@ namespace Robotic {
         }
     }
 
-
+    /**
+     * IIC Ultrasonic SR09.
+     * @param address Ultrasonic iic address; eg: UltrasonicAddress.Addr13
+     */
+    //% blockId=robotic_ultrasonic block="Ultrasonic |%address"
+    //% weight=79
+    //% inlineInputMode=inline
+    export function Ultrasonic(address: UltrasonicAddress): number {
+        address = address >> 1  // 7 bit address
+        i2cwrite(address, CMDREG, CMDB4)
+        pause(87)   // wait the data,max 87ms
+        i2ccmd(address, CMDREG)
+        let data_mm = 0
+        data_mm = i2cread(address, CMDREG) << 8
+        data_mm |= i2cread(address, CMDREG + 1)
+        return data_mm
+    }
 
 }
