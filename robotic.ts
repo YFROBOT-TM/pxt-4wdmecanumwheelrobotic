@@ -44,6 +44,29 @@ namespace Robotic {
     const CMDREG = 0x02
     const CMDB4 = 0xB4  // 1~500cm , mm, Temperature compensation, max interval 87ms
 
+    // IR 
+    const MICROBIT_MAKERBIT_IR_NEC = 777
+    const MICROBIT_MAKERBIT_IR_BUTTON_PRESSED_ID = 789
+    const MICROBIT_MAKERBIT_IR_BUTTON_RELEASED_ID = 790
+    const IR_REPEAT = 256
+    const IR_INCOMPLETE = 257
+
+    let initialized = false // Initialization flag
+    let Motor1Dir = 1       // motor 1 direction
+    let Motor2Dir = -1       // motor 2 direction
+    let Motor3Dir = 1       // motor 3 direction
+    let Motor4Dir = -1       // motor 4 direction
+    let SR09Address = 0xE8  // sr09 iic address
+
+    // IR
+    let irState: IrState
+    interface IrState {
+        protocol: IrProtocol;
+        command: number;
+        hasNewCommand: boolean;
+        bitsReceived: uint8;
+        commandBits: uint8;
+    }
 
     export enum Motors {
         M1 = 0x1,
@@ -68,25 +91,95 @@ namespace Robotic {
     }
 
     export enum UltrasonicAddress {
-        Addr1 = 0xD0, Addr2 = 0xD2,
-        Addr3 = 0xD4, Addr4 = 0xD6,
-        Addr5 = 0xD8, Addr6 = 0xDA,
-        Addr7 = 0xDC, Addr8 = 0xDE,
-        Addr9 = 0xE0, Addr10 = 0xE2,
-        Addr11 = 0xE4, Addr12 = 0xE6,
-        Addr13 = 0xE8, Addr14 = 0xEA,
-        Addr15 = 0xEC, Addr16 = 0xEE,
-        Addr17 = 0xF8, Addr18 = 0xFA,
-        Addr19 = 0xFC, Addr20 = 0xFE
+        XD0 = 0xD0, XD2 = 0xD2,
+        XD4 = 0xD4, XD6 = 0xD6,
+        XD8 = 0xD8, XDA = 0xDA,
+        XDC = 0xDC, XDE = 0xDE,
+        XE0 = 0xE0, XE2 = 0xE2,
+        XE4 = 0xE4, XE6 = 0xE6,
+        XE8 = 0xE8, XEA = 0xEA,
+        XEC = 0xEC, XEE = 0xEE,
+        XF8 = 0xF8, XFA = 0xFA,
+        XFC = 0xFC, XFE = 0xFE
     }
 
+    export enum IrProtocol {
+        //% block="Keyestudio"
+        Keyestudio = 0,
+        //% block="NEC"
+        NEC = 1,
+    }
 
-    let initialized = false // Initialization flag
-    let Motor1Dir = 1       // motor 1 direction
-    let Motor2Dir = 1       // motor 2 direction
-    let Motor3Dir = 1       // motor 3 direction
-    let Motor4Dir = 1       // motor 4 direction
-    let SR09Address = 0xE8  // sr09 iic address
+    export enum IrButtonAction {
+        //% block="pressed"
+        Pressed = 0,
+        //% block="released"
+        Released = 1,
+    }
+
+    export enum IrButton {
+        //IR HANDLE
+        //% block="up"
+        UP = 0x11,
+        //% block="down"
+        DOWN = 0x91,
+        //% block="left"
+        LEFT = 0x81,
+        //% block="right"
+        RIGHT = 0xa1,
+        //% block="m1"
+        M1 = 0xe9,
+        //% block="m2"
+        M2 = 0x69,
+        //% block="a"
+        A = 0x21,
+        //% block="b"
+        B = 0x01,
+        //% block="any"
+        Any = -1,
+        // MINI IR 
+        //% block="power"
+        Power = 0xa2,
+        //% block="menu"
+        MENU = 0xe2,
+        //% block="test"
+        TEST = 0x22,
+        //% block="+"
+        PLUS = 0x02,
+        //% block="back"
+        Back = 0xc2,
+        //% block="<<"
+        Back2 = 0xe0,
+        //% block="play"
+        Play = 0xa8,
+        //% block=">>"
+        F = 0x90,
+        //% block="0"
+        Number_0 = 0x68,
+        //% block="-"
+        Less = 0x98,
+        //% block="c"
+        C = 0xb0,
+        //% block="1"
+        Number_1 = 0x30,
+        //% block="2"
+        Number_2 = 0x18,
+        //% block="3"
+        Number_3 = 0x7a,
+        //% block="4"
+        Number_4 = 0x10,
+        //% block="5"
+        Number_5 = 0x38,
+        //% block="6"
+        Number_6 = 0x5a,
+        //% block="7"
+        Number_7 = 0x42,
+        //% block="8"
+        Number_8 = 0x4a,
+        //% block="9"
+        Number_9 = 0x52,
+    }
+
 
 
     function i2cwrite(addr: number, reg: number, value: number) {
@@ -114,6 +207,7 @@ namespace Robotic {
         for (let idx = 0; idx < 16; idx++) {
             setPwm(idx, 0, 0);
         }
+
         initialized = true
     }
 
@@ -176,17 +270,20 @@ namespace Robotic {
 
         if (index == Motors.MAll) {
             if (direction * Motor1Dir == 1)
-                setPwm(Motor1DirectionChannel, 0, 4096)
-            else
                 setPwm(Motor1DirectionChannel, 4096, 0)
+            else
+                setPwm(Motor1DirectionChannel, 0, 4096)
+
             if (direction * Motor2Dir == 1)
                 setPwm(Motor2DirectionChannel, 4096, 0)
             else
                 setPwm(Motor2DirectionChannel, 0, 4096)
+
             if (direction * Motor3Dir == 1)
-                setPwm(Motor3DirectionChannel, 0, 4096)
-            else
                 setPwm(Motor3DirectionChannel, 4096, 0)
+            else
+                setPwm(Motor3DirectionChannel, 0, 4096)
+
             if (direction * Motor4Dir == 1)
                 setPwm(Motor4DirectionChannel, 4096, 0)
             else
@@ -200,19 +297,19 @@ namespace Robotic {
             let dir
             let mDirPin = (index - 1) * 2
             let mPwmPin = (index - 1) * 2 + 1
-            if (mDirPin == 0) {
+            if (mDirPin == Motor1DirectionChannel) {
                 dir = Motor1Dir
-            } else if (mDirPin == 2) {
-                dir = Motor2Dir * -1
-            } else if (mDirPin == 4) {
+            } else if (mDirPin == Motor2DirectionChannel) {
+                dir = Motor2Dir
+            } else if (mDirPin == Motor3DirectionChannel) {
                 dir = Motor3Dir
-            } else if (mDirPin == 6) {
-                dir = Motor4Dir * -1
+            } else if (mDirPin == Motor4DirectionChannel) {
+                dir = Motor4Dir
             }
             if (direction * dir == 1) {
-                setPwm(mDirPin, 0, 4096)
-            } else {
                 setPwm(mDirPin, 4096, 0)
+            } else {
+                setPwm(mDirPin, 0, 4096)
             }
             setPwm(mPwmPin, 0, speed)
         }
@@ -227,10 +324,10 @@ namespace Robotic {
         if (speed <= -4096) speed = -4095
 
         if (speed >= 0) {
-            setPwm(dirPin, 0, 4096)
+            setPwm(dirPin, 4096, 0)
             setPwm(pwmPin, 0, speed)
         } else {
-            setPwm(dirPin, 4096, 0)
+            setPwm(dirPin, 0, 4096)
             setPwm(pwmPin, 0, -speed)
         }
     }
@@ -260,9 +357,9 @@ namespace Robotic {
         speedMotor4 = speedMotor4 * Motor4Dir
 
         setSingleMotor(Motor1DirectionChannel, Motor1PWMChannel, speedMotor1);
-        setSingleMotor(Motor2DirectionChannel, Motor2PWMChannel, -speedMotor2);
+        setSingleMotor(Motor2DirectionChannel, Motor2PWMChannel, speedMotor2);
         setSingleMotor(Motor3DirectionChannel, Motor3PWMChannel, speedMotor3);
-        setSingleMotor(Motor4DirectionChannel, Motor4PWMChannel, -speedMotor4);
+        setSingleMotor(Motor4DirectionChannel, Motor4PWMChannel, speedMotor4);
     }
 
     /**
@@ -277,10 +374,10 @@ namespace Robotic {
     //% inlineInputMode=inline
     //% advanced=true
     export function initMotorDirectionReverse(m1Dir: SetMotorDir, m2Dir: SetMotorDir, m3Dir: SetMotorDir, m4Dir: SetMotorDir) {
-        Motor1Dir = m1Dir;      // motor 1 direction
-        Motor2Dir = m2Dir;      // motor 2 direction
-        Motor3Dir = m3Dir;      // motor 3 direction
-        Motor4Dir = m4Dir;      // motor 4 direction
+        Motor1Dir = m1Dir;          // motor 1 direction
+        Motor2Dir = m2Dir * -1;     // motor 2 direction
+        Motor3Dir = m3Dir;          // motor 3 direction
+        Motor4Dir = m4Dir * -1;     // motor 4 direction
     }
 
     /**
@@ -310,10 +407,11 @@ namespace Robotic {
 
     /**
      * IIC Ultrasonic SR09.
-     * @param address Ultrasonic iic address; eg: UltrasonicAddress.Addr13
+     * @param address Ultrasonic iic address; eg: Robotic.UltrasonicAddress.XE8
      */
     //% blockId=robotic_ultrasonic block="Ultrasonic |%address"
     //% weight=79
+    //% address.fieldEditor="gridpicker" address.fieldOptions.columns=4
     //% inlineInputMode=inline
     export function Ultrasonic(address: UltrasonicAddress): number {
         address = address >> 1  // 7 bit address
@@ -325,5 +423,237 @@ namespace Robotic {
         data_mm |= i2cread(address, CMDREG + 1)
         return data_mm
     }
+
+
+    /***************** IR *******************/
+
+    function pushBit(bit: number): number {
+        irState.bitsReceived += 1;
+        if (irState.bitsReceived <= 8) {
+            // ignore all address bits
+            if (irState.protocol === IrProtocol.Keyestudio && bit === 1) {
+                // recover from missing message bits at the beginning
+                // Keyestudio address is 0 and thus missing bits can be easily detected
+                // by checking for the first inverse address bit (which is a 1)
+                irState.bitsReceived = 9;
+            }
+            return IR_INCOMPLETE;
+        }
+        if (irState.bitsReceived <= 16) {
+            // ignore all inverse address bits
+            return IR_INCOMPLETE;
+        } else if (irState.bitsReceived < 24) {
+            irState.commandBits = (irState.commandBits << 1) + bit;
+            return IR_INCOMPLETE;
+        } else if (irState.bitsReceived === 24) {
+            irState.commandBits = (irState.commandBits << 1) + bit;
+            return irState.commandBits & 0xff;
+        } else {
+            // ignore all inverse command bits
+            return IR_INCOMPLETE;
+        }
+    }
+
+    function detectCommand(markAndSpace: number): number {
+        if (markAndSpace < 1600) {
+            // low bit
+            return pushBit(0);
+        } else if (markAndSpace < 2700) {
+            // high bit
+            return pushBit(1);
+        }
+
+        irState.bitsReceived = 0;
+
+        if (markAndSpace < 12500) {
+            // Repeat detected
+            return IR_REPEAT;
+        } else if (markAndSpace < 14500) {
+            // Start detected
+            return IR_INCOMPLETE;
+        } else {
+            return IR_INCOMPLETE;
+        }
+    }
+
+    function enableIrMarkSpaceDetection(pin: DigitalPin) {
+        pins.setPull(pin, PinPullMode.PullNone);
+
+        let mark = 0;
+        let space = 0;
+
+        pins.onPulsed(pin, PulseValue.Low, () => {
+            // HIGH, see https://github.com/microsoft/pxt-microbit/issues/1416
+            mark = pins.pulseDuration();
+        });
+
+        pins.onPulsed(pin, PulseValue.High, () => {
+            // LOW
+            space = pins.pulseDuration();
+            const command = detectCommand(mark + space);
+            if (command !== IR_INCOMPLETE) {
+                control.raiseEvent(MICROBIT_MAKERBIT_IR_NEC, command);
+            }
+        });
+    }
+
+    /**
+     * Connects to the IR receiver module at the specified pin and configures the IR protocol.
+     * @param pin IR receiver pin. eg: DigitalPin.P1
+     * @param protocol IR protocol. eg: Robotic.IrProtocol.NEC
+     */
+    //% subcategory="IR Receiver"
+    //% blockId="makerbit_infrared_connect_receiver"
+    //% block="connect IR receiver at pin %pin and decode %protocol"
+    //% pin.fieldEditor="gridpicker"
+    //% pin.fieldOptions.columns=4
+    //% pin.fieldOptions.tooltips="false"
+    //% weight=15
+    export function connectIrReceiver(pin: DigitalPin, protocol: IrProtocol): void {
+        if (irState) {
+            return;
+        }
+
+        irState = {
+            protocol: protocol,
+            bitsReceived: 0,
+            commandBits: 0,
+            command: IrButton.Any,
+            hasNewCommand: false,
+        };
+
+        enableIrMarkSpaceDetection(pin);
+
+        let activeCommand = IR_INCOMPLETE;
+        let repeatTimeout = 0;
+        const REPEAT_TIMEOUT_MS = 120;
+
+        control.onEvent(
+            MICROBIT_MAKERBIT_IR_NEC,
+            EventBusValue.MICROBIT_EVT_ANY,
+            () => {
+                const necValue = control.eventValue();
+
+                // Refresh repeat timer
+                if (necValue <= 255 || necValue === IR_REPEAT) {
+                    repeatTimeout = input.runningTime() + REPEAT_TIMEOUT_MS;
+                }
+
+                // Process a new command
+                if (necValue <= 255 && necValue !== activeCommand) {
+                    if (activeCommand >= 0) {
+                        control.raiseEvent(
+                            MICROBIT_MAKERBIT_IR_BUTTON_RELEASED_ID,
+                            activeCommand
+                        );
+                    }
+
+                    irState.hasNewCommand = true;
+                    irState.command = necValue;
+                    activeCommand = necValue;
+                    control.raiseEvent(MICROBIT_MAKERBIT_IR_BUTTON_PRESSED_ID, necValue);
+                }
+            }
+        );
+
+        control.inBackground(() => {
+            while (true) {
+                if (activeCommand === IR_INCOMPLETE) {
+                    // sleep to save CPU cylces
+                    basic.pause(2 * REPEAT_TIMEOUT_MS);
+                } else {
+                    const now = input.runningTime();
+                    if (now > repeatTimeout) {
+                        // repeat timed out
+                        control.raiseEvent(
+                            MICROBIT_MAKERBIT_IR_BUTTON_RELEASED_ID,
+                            activeCommand
+                        );
+                        activeCommand = IR_INCOMPLETE;
+                    } else {
+                        basic.pause(REPEAT_TIMEOUT_MS);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Do something when a specific button is pressed or released on the remote control.
+     * @param button the button to be checked
+     * @param action the trigger action
+     * @param handler body code to run when event is raised
+     */
+    //% subcategory="IR Receiver"
+    //% blockId=makerbit_infrared_on_ir_button
+    //% block="on IR button | %button | %action"
+    //% button.fieldEditor="gridpicker"
+    //% button.fieldOptions.columns=3
+    //% button.fieldOptions.tooltips="false"
+    //% weight=13
+    export function onIrButton(button: IrButton, action: IrButtonAction, handler: () => void) {
+        control.onEvent(
+            action === IrButtonAction.Pressed
+                ? MICROBIT_MAKERBIT_IR_BUTTON_PRESSED_ID
+                : MICROBIT_MAKERBIT_IR_BUTTON_RELEASED_ID,
+            button === IrButton.Any ? EventBusValue.MICROBIT_EVT_ANY : button,
+            () => {
+                irState.command = control.eventValue();
+                handler();
+            }
+        );
+    }
+
+    /**
+     * Returns the code of the IR button that was pressed last. Returns -1 (IrButton.Any) if no button has been pressed yet.
+     */
+    //% subcategory="IR Receiver"
+    //% blockId=makerbit_infrared_ir_button_pressed
+    //% block="IR button"
+    //% weight=10
+    export function irButton(): number {
+        if (!irState) {
+            return IrButton.Any;
+        }
+        return irState.command;
+    }
+
+    /**
+     * Returns true if any button was pressed since the last call of this function. False otherwise.
+     */
+    //% subcategory="IR Receiver"
+    //% blockId=makerbit_infrared_was_any_button_pressed
+    //% block="any IR button was pressed"
+    //% weight=7
+    export function wasAnyIrButtonPressed(): boolean {
+        if (!irState) {
+            return false;
+        }
+        if (irState.hasNewCommand) {
+            irState.hasNewCommand = false;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns the command code of a specific IR button.
+     * @param button the button
+     */
+    //% subcategory="IR Receiver"
+    //% blockId=makerbit_infrared_button_code
+    //% button.fieldEditor="gridpicker"
+    //% button.fieldOptions.columns=3
+    //% button.fieldOptions.tooltips="false"
+    //% block="IR button code %button"
+    //% weight=5
+    export function irButtonCode(button: IrButton): number {
+        return button as number;
+    }
+
+
+    /***************** PS2 *******************/
+
 
 }
