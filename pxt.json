@@ -1,13 +1,13 @@
 {
     "name": "4WDRobotic",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "",
     "license": "MIT",
     "dependencies": {
         "core": "*",
         "radio": "*",
         "neopixel": "github:microsoft/pxt-neopixel",
-        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller#v0.0.2"
+        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller#v0.0.4"
     },
     "files": [
         "README.md",
