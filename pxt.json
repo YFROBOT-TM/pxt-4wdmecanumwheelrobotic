@@ -1,6 +1,6 @@
 {
     "name": "4WDRobotic",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "",
     "license": "MIT",
     "dependencies": {
@@ -12,7 +12,7 @@
     "files": [
         "README.md",
         "main.blocks",
-        "main.ts",
+        "test.ts",
         "robotic.ts"
     ],
     "testFiles": [
