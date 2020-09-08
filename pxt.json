@@ -7,11 +7,10 @@
         "core": "*",
         "radio": "*",
         "neopixel": "github:microsoft/pxt-neopixel",
-        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller"
+        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller#v0.0.2"
     },
     "files": [
         "README.md",
-        "test.ts",
         "robotic.ts"
     ],
     "testFiles": [
@@ -21,5 +20,5 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }
