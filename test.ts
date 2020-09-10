@@ -1,10 +1,3 @@
-// tests go here; this will not be compiled when this package is used as an extension.
-input.onButtonPressed(Button.A, function () {
-    strip.showRainbow(1, 360)
-    basic.pause(1000)
-    strip.clear()
-    strip.show()
-})
 input.onButtonPressed(Button.B, function () {
     Robotic.setMotor(Robotic.Motors.MAll, Robotic.Dir.CW, 206)
     basic.pause(1000)
@@ -12,13 +5,7 @@ input.onButtonPressed(Button.B, function () {
     basic.pause(1000)
     Robotic.stopMotor(Robotic.Motors.MAll)
 })
-function R () {
-	
-}
-let strip: neopixel.Strip = null
 Robotic.connectIrReceiver(DigitalPin.P1, Robotic.IrProtocol.NEC)
-strip = neopixel.create(DigitalPin.P8, 6, NeoPixelMode.RGB)
-music.playMelody("C5 B A G F E D C ", 500)
 basic.forever(function () {
     if (Robotic.irButton() == Robotic.irButtonCode(Robotic.IrButton.Number_2)) {
         Robotic.setMotor(Robotic.Motors.MAll, Robotic.Dir.CW, 200)
