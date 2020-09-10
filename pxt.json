@@ -7,7 +7,7 @@
         "core": "*",
         "radio": "*",
         "neopixel": "github:microsoft/pxt-neopixel",
-        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller"
+        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller#v0.0.5"
     },
     "files": [
         "README.md",
