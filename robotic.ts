@@ -118,48 +118,53 @@ namespace Robotic {
     }
 
     export enum IrButton {
-        //IR HANDLE
-        //% block="up"
-        UP = 0x11,
-        //% block="down"
-        DOWN = 0x91,
-        //% block="left"
-        LEFT = 0x81,
-        //% block="right"
-        RIGHT = 0xa1,
-        //% block="m1"
-        M1 = 0xe9,
-        //% block="m2"
-        M2 = 0x69,
-        //% block="a"
-        A = 0x21,
-        //% block="b"
-        B = 0x01,
-        //% block="any"
+        // any button
+        //% block="Any"
         Any = -1,
+
+        //IR HANDLE
+        //% block="↑"
+        UP = 0x11,
+        //% block="↓"
+        DOWN = 0x91,
+        //% block="←"
+        LEFT = 0x81,
+        //% block="→"
+        RIGHT = 0xa1,
+        //% block="M1"
+        M1 = 0xe9,
+        //% block="M2"
+        M2 = 0x69,
+        //% block="A"
+        A = 0x21,
+        //% block="B"
+        B = 0x01,
+
         // MINI IR 
-        //% block="power"
-        Power = 0xa2,
-        //% block="menu"
-        MENU = 0xe2,
-        //% block="test"
-        TEST = 0x22,
-        //% block="+"
-        PLUS = 0x02,
-        //% block="back"
-        Back = 0xc2,
-        //% block="<<"
-        Back2 = 0xe0,
-        //% block="play"
-        Play = 0xa8,
-        //% block=">>"
-        F = 0x90,
+        //% block="A"
+        Mini_A = 0xa2,
+        //% block="B"
+        Mini_B = 0x62,
+        //% block="C"
+        Mini_C = 0xe2,
+        //% block="D"
+        Mini_D = 0x22,
+        //% block="︿"
+        Mini_UP = 0x02,
+        //% block="E"
+        Mini_E = 0xc2,
+        //% block="＜"
+        Mini_Left = 0xe0,
+        //% block="۞"
+        Mini_SET = 0xa8,
+        //% block="＞"
+        Mini_Right = 0x90,
         //% block="0"
         Number_0 = 0x68,
-        //% block="-"
-        Less = 0x98,
-        //% block="c"
-        C = 0xb0,
+        //% block="﹀"
+        Mini_Down = 0x98,
+        //% block="F"
+        Mini_F = 0xb0,
         //% block="1"
         Number_1 = 0x30,
         //% block="2"
