@@ -1,4 +1,4 @@
-6input.onButtonPressed(Button.B, function () {
+input.onButtonPressed(Button.B, function () {
     Robotic.setMotor(Robotic.Motors.MAll, Robotic.Dir.CW, 206)
     basic.pause(1000)
     Robotic.setMotor(Robotic.Motors.MAll, Robotic.Dir.CCW, 156)
