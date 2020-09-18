@@ -1,12 +1,11 @@
 {
     "name": "4WDRobotic",
-    "version": "0.1.0",
-    "description": "",
+    "version": "0.1.2",
+    "description": "YFROBOT 4WD macanum wheel robot",
     "license": "MIT",
     "dependencies": {
         "core": "*",
-        "neopixel": "github:microsoft/pxt-neopixel",
-        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller#v0.0.8"
+        "ps2controller": "github:yfrobot-tm/pxt-ps2-controller#v0.0.9"
     },
     "files": [
         "README.md",
