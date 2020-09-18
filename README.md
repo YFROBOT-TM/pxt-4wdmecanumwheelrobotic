@@ -1,22 +1,22 @@
 
-> Open this page at [https://.github.io//](https://.github.io//)
+> Open this page at [4wd mecanum wheel robot](http://www.yfrobot.com/wiki/index.php?title=4WDRobotic)
 
 ## Use as Extension
 
 This repository can be added as an **extension** in MakeCode.
 
-* open []()
+* open [https://makecode.microbit.org](https://makecode.microbit.org)
 * click on **New Project**
 * click on **Extensions** under the gearwheel menu
-* search for **https://github.com/** and import
+* search for **https://github.com/YFROBOT-TM/pxt-4wdmecanumwheelrobotic** and import
 
 ## Edit this project ![Build status badge](https://github.com//workflows/MakeCode/badge.svg)
 
 To edit this repository in MakeCode.
 
-* open []()
+* open [https://makecode.microbit.org](https://makecode.microbit.org)
 * click on **Import** then click on **Import URL**
-* paste **https://github.com/** and click import
+* paste **https://github.com/YFROBOT-TM/pxt-4wdmecanumwheelrobotic** and click import
 
 ## Blocks preview
 
