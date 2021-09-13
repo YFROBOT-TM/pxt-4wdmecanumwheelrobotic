@@ -419,13 +419,13 @@ namespace Robotic {
     //% address.fieldEditor="gridpicker" address.fieldOptions.columns=4
     //% inlineInputMode=inline
     export function Ultrasonic(address: UltrasonicAddress): number {
-        address = address >> 1  // 7 bit address
-        i2cwrite(address, CMDREG, CMDB4)
+        let adr = address >> 1  // 7 bit address
+        i2cwrite(adr, CMDREG, CMDB4)
         pause(87)   // wait the data,max 87ms
-        i2ccmd(address, CMDREG)
+        i2ccmd(adr, CMDREG)
         let data_mm = 0
-        data_mm = i2cread(address, CMDREG) << 8
-        data_mm |= i2cread(address, CMDREG + 1)
+        data_mm = i2cread(adr, CMDREG) << 8
+        data_mm |= i2cread(adr, CMDREG + 1)
         return data_mm
     }
 
